@@ -25,7 +25,7 @@ Stats bubbleSort(std::vector<int>& arr) {
             }
         }
 
-        if (!swapped) // ≈сли не было перестановок на этой итерации, то массив уже отсортирован
+        if (!swapped)
             break;
     }
 
@@ -55,6 +55,33 @@ Stats shellSort(std::vector<int>& arr) {
     return stats;
 }
 
+Stats combSort(std::vector<int>& arr) {
+    Stats stats;
+    int n = arr.size();
+    int gap = n;
+    bool swapped = true;
+
+    while (gap > 1 || swapped) {
+        gap = (gap * 10) / 13;
+
+        if (gap < 1)
+            gap = 1;
+
+        swapped = false;
+
+        for (int i = 0; i < n - gap; ++i) {
+            ++stats.comparison_count;
+            if (arr[i] > arr[i + gap]) {
+                std::swap(arr[i], arr[i + gap]);
+                ++stats.copy_count;
+                swapped = true;
+            }
+        }
+    }
+
+    return stats;
+}
+
 void printArray(const std::vector<int>& arr) {
     for (int num : arr) {
         std::cout << num << " ";
@@ -70,7 +97,7 @@ int main() {
     std::cout << "»сходный массив: ";
     printArray(arr);
 
-    Stats stats = shellSort(arr);
+    Stats stats = combSort(arr);
 
     std::cout << "ќтсортированный массив: ";
     printArray(arr);
