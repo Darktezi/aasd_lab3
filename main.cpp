@@ -32,6 +32,29 @@ Stats bubbleSort(std::vector<int>& arr) {
     return stats;
 }
 
+Stats shellSort(std::vector<int>& arr) {
+    Stats stats;
+    int n = arr.size();
+
+    for (int gap = n / 2; gap > 0; gap /= 2) {
+        for (int i = gap; i < n; ++i) {
+            int temp = arr[i];
+            int j;
+
+            ++stats.copy_count;
+            for (j = i; j >= gap && arr[j - gap] > temp; j -= gap) {
+                ++stats.comparison_count;
+                arr[j] = arr[j - gap];
+                ++stats.copy_count;
+            }
+
+            arr[j] = temp;
+        }
+    }
+
+    return stats;
+}
+
 void printArray(const std::vector<int>& arr) {
     for (int num : arr) {
         std::cout << num << " ";
@@ -47,7 +70,7 @@ int main() {
     std::cout << "Исходный массив: ";
     printArray(arr);
 
-    Stats stats = bubbleSort(arr);
+    Stats stats = shellSort(arr);
 
     std::cout << "Отсортированный массив: ";
     printArray(arr);
