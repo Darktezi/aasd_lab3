@@ -12,18 +12,18 @@ struct Stats {
     size_t copy_count = 0;
 };
 
-Stats bubbleSort(std::vector<int>& arr) {
+template<typename Iterator>
+Stats bubbleSort(Iterator begin, Iterator end) {
     Stats stats;
-    int n = arr.size();
     bool swapped;
 
-    for (int i = 0; i < n - 1; ++i) {
+    for (auto i = begin; i != end; ++i) {
         swapped = false;
 
-        for (int j = 0; j < n - i - 1; ++j) {
+        for (auto j = begin; j != end - 1; ++j) {
             ++stats.comparison_count;
-            if (arr[j] > arr[j + 1]) {
-                std::swap(arr[j], arr[j + 1]);
+            if (*j > *(j + 1)) {
+                std::iter_swap(j, j + 1);
                 ++stats.copy_count;
                 swapped = true;
             }
@@ -36,33 +36,35 @@ Stats bubbleSort(std::vector<int>& arr) {
     return stats;
 }
 
-Stats shellSort(std::vector<int>& arr) {
+template<typename Iterator>
+Stats shellSort(Iterator begin, Iterator end) {
     Stats stats;
-    int n = arr.size();
+    auto n = std::distance(begin, end);
 
-    for (int gap = n / 2; gap > 0; gap /= 2) {
-        for (int i = gap; i < n; ++i) {
-            int temp = arr[i];
-            int j;
+    for (auto gap = n / 2; gap > 0; gap /= 2) {
+        for (auto i = begin + gap; i != end; ++i) {
+            auto temp = *i;
+            auto j = i;
 
             ++stats.copy_count;
-            for (j = i; j >= gap && arr[j - gap] > temp; j -= gap) {
+            for (; j >= begin + gap && *(j - gap) > temp; j -= gap) {
                 ++stats.comparison_count;
-                arr[j] = arr[j - gap];
+                *j = *(j - gap);
                 ++stats.copy_count;
             }
 
-            arr[j] = temp;
+            *j = temp;
         }
     }
 
     return stats;
 }
 
-Stats combSort(std::vector<int>& arr) {
+template<typename Iterator>
+Stats combSort(Iterator begin, Iterator end) {
     Stats stats;
-    int n = arr.size();
-    int gap = n;
+    auto n = std::distance(begin, end);
+    auto gap = n;
     bool swapped = true;
 
     while (gap > 1 || swapped) {
@@ -73,10 +75,10 @@ Stats combSort(std::vector<int>& arr) {
 
         swapped = false;
 
-        for (int i = 0; i < n - gap; ++i) {
+        for (auto i = begin; i != end - gap; ++i) {
             ++stats.comparison_count;
-            if (arr[i] > arr[i + gap]) {
-                std::swap(arr[i], arr[i + gap]);
+            if (*i > *(i + gap)) {
+                std::iter_swap(i, i + gap);
                 ++stats.copy_count;
                 swapped = true;
             }
@@ -126,9 +128,9 @@ int main() {
         std::cout << "Bubble sort for 100 random arrays, 1 sorted and 1 inverted" << std::endl;
         size_t sum_comparison = 0, sum_copy = 0;
         for (int i = 0; i < 100; ++i) {
-            //cout << "Number of array: " << i << endl;
+            std::cout << "Number of array: " << i << std::endl;
             std::vector<int> arr = generate_random_vector(SIZE);
-            Stats tmp = bubbleSort(arr);
+            Stats tmp = bubbleSort(arr.begin(), arr.end());
             sum_comparison += tmp.comparison_count;
             sum_copy += tmp.copy_count;
         }
@@ -136,13 +138,13 @@ int main() {
         std::cout << "Average copy quantity: " << sum_copy / 100 << std::endl;
 
         std::vector<int> sorted = generate_sorted_vector(SIZE);
-        Stats sorted_stats = bubbleSort(sorted);
+        Stats sorted_stats = bubbleSort(sorted.begin(), sorted.end());
         std::cout << std::endl;
         std::cout << "comparison quantity for sorted vector: " << sorted_stats.comparison_count << std::endl;
         std::cout << "copy quantity for sorted vector: " << sorted_stats.copy_count << std::endl;
 
         std::vector<int> inverted = generate_inverted_vector(SIZE);
-        Stats inverted_stats = bubbleSort(inverted);
+        Stats inverted_stats = bubbleSort(inverted.begin(), inverted.end());
         std::cout << std::endl;
         std::cout << "comparison quantity for inverted vector: " << inverted_stats.comparison_count << std::endl;
         std::cout << "copy quantity for inverted vector: " << inverted_stats.copy_count << std::endl;
@@ -155,7 +157,7 @@ int main() {
         for (int i = 0; i < 100; ++i) {
             //cout << "Number of array: " << i << endl;
             std::vector<int> arr = generate_random_vector(SIZE);
-            Stats tmp = shellSort(arr);
+            Stats tmp = shellSort(arr.begin(), arr.end());
             sum_comparison += tmp.comparison_count;
             sum_copy += tmp.copy_count;
         }
@@ -164,13 +166,13 @@ int main() {
         std::cout << "Average copy quantity: " << sum_copy / 100 << std::endl;
 
         std::vector<int> sorted = generate_sorted_vector(SIZE);
-        Stats sorted_stats = shellSort(sorted);
+        Stats sorted_stats = shellSort(sorted.begin(), sorted.end());
         std::cout << std::endl;
         std::cout << "comparison quantity for sorted vector: " << sorted_stats.comparison_count << std::endl;
         std::cout << "copy quantity for sorted vector: " << sorted_stats.copy_count << std::endl;
 
         std::vector<int> inverted = generate_inverted_vector(SIZE);
-        Stats inverted_stats = shellSort(inverted);
+        Stats inverted_stats = shellSort(inverted.begin(), inverted.end());
         std::cout << std::endl;
         std::cout << "comparison quantity for inverted vector: " << inverted_stats.comparison_count << std::endl;
         std::cout << "copy quantity for inverted vector: " << inverted_stats.copy_count << std::endl;
@@ -183,7 +185,7 @@ int main() {
         for (int i = 0; i < 100; ++i) {
             //cout << "Number of array: " << i << endl;
             std::vector<int> arr = generate_random_vector(SIZE);
-            Stats tmp = combSort(arr);
+            Stats tmp = combSort(arr.begin(), arr.end());
             sum_comparison += tmp.comparison_count;
             sum_copy += tmp.copy_count;
         }
@@ -192,13 +194,13 @@ int main() {
         std::cout << "Average copy quantity: " << sum_copy / 100 << std::endl;
 
         std::vector<int> sorted = generate_sorted_vector(SIZE);
-        Stats sorted_stats = combSort(sorted);
+        Stats sorted_stats = combSort(sorted.begin(), sorted.end());
         std::cout << std::endl;
         std::cout << "comparison quantity for sorted vector: " << sorted_stats.comparison_count << std::endl;
         std::cout << "copy quantity for sorted vector: " << sorted_stats.copy_count << std::endl;
 
         std::vector<int> inverted = generate_inverted_vector(SIZE);
-        Stats inverted_stats = combSort(inverted);
+        Stats inverted_stats = combSort(inverted.begin(), inverted.end());
         std::cout << std::endl;
         std::cout << "comparison quantity for inverted vector: " << inverted_stats.comparison_count << std::endl;
         std::cout << "copy quantity for inverted vector: " << inverted_stats.copy_count << std::endl;
